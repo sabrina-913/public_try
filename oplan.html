@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy 30th Birthday Trip</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #1a1e24; --bg-grad-center: #262c36; --bg-grad-edge: #13161a;
+      --book-bg: #151515; --gold: #D4AF37; --gold-dim: #8b7322; 
+      --text-light: #e0e0e0; --text-dim: #a0a0a0; --line: #333333;
+    }
+
+    body.okinawa-theme {
+      --bg-color: #e0f7fa; --bg-grad-center: #ffffff; --bg-grad-edge: #b2ebf2;
+      --book-bg: #f8fdff; --gold: #0277bd; --gold-dim: #4fc3f7; 
+      --text-light: #1c313a; --text-dim: #455a64; --line: #b3e5fc;
+    }
+
+    body { background-color: var(--bg-color); background-image: radial-gradient(circle at center, var(--bg-grad-center) 0%, var(--bg-grad-edge) 100%); min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif TC', serif; overflow: hidden; transition: all 1.5s ease; }
+
+    /* 背景與硬體加速 */
+    .bg-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; transition: opacity 1.5s ease; }
+    .balloons-layer { opacity: 1; } body.okinawa-theme .balloons-layer { opacity: 0; }
+    .clouds-layer { opacity: 0; } body.okinawa-theme .clouds-layer { opacity: 1; }
+
+    .balloon { position: absolute; bottom: -300px; width: 180px; height: 220px; background: radial-gradient(circle at 35% 35%, #fff0d4 0%, #d4af37 60%, #8b7322 100%); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; box-shadow: inset -10px -10px 25px rgba(0,0,0,0.4), 0 0 40px rgba(212,175,55,0.2); animation: floatUp linear infinite; will-change: transform; }
+    
+    /* 修正氣球接點 */
+    .balloon::after { content: ''; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 16px solid #a68521; }
+    .balloon::before { content: ''; position: absolute; bottom: -130px; left: 50%; width: 30px; height: 130px; border-left: 2px solid rgba(212,175,55,0.6); border-radius: 0 0 0 100%; }
+
+    .cloud { position: absolute; bottom: -300px; background: rgba(255, 255, 255, 0.9); width: 380px; height: 120px; border-radius: 100px; box-shadow: 0 15px 30px rgba(0,0,0,0.05); animation: floatUp linear infinite; filter: blur(0.5px); will-change: transform; }
+    .cloud::before, .cloud::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.9); border-radius: 50%; }
+    .cloud::before { width: 160px; height: 160px; top: -70px; left: 40px; }
+    .cloud::after { width: 220px; height: 220px; top: -110px; right: 40px; }
+
+    .p1 { left: 8%; animation-duration: 22s; animation-delay: 0s; transform: scale(1.1); }
+    .p2 { left: 28%; animation-duration: 28s; animation-delay: 5s; transform: scale(0.8); }
+    .p3 { left: 50%; animation-duration: 25s; animation-delay: 2s; transform: scale(1.3); }
+    .p4 { left: 72%; animation-duration: 32s; animation-delay: 8s; transform: scale(0.9); }
+    .p5 { left: 85%; animation-duration: 20s; animation-delay: 12s; transform: scale(1.2); }
+    
+    @keyframes floatUp { to { transform: translate3d(0, -150vh, 0) rotate(5deg); } }
+
+    /* 字體與書本排版 */
+    .cursive { font-family: 'Dancing Script', cursive; color: #ffffff; text-shadow: 0 2px 8px rgba(255,255,255,0.2); transition: color 1.5s; }
+    body.okinawa-theme .cursive { color: #0277bd; text-shadow: 0 2px 8px rgba(2,119,189,0.3); }
+    .serif-title { font-family: 'Playfair Display', serif; font-weight: 700; letter-spacing: 1px; }
+
+    .scene { perspective: 2500px; width: 960px; height: 640px; display: flex; align-items: center; justify-content: center; }
+    .book-wrapper { width: 100%; height: 100%; transform: translateX(-240px); transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1); will-change: transform; }
+    .book-wrapper.is-open { transform: translateX(0); }
+    .book { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
+
+    .leaf { position: absolute; right: 0; width: 50%; height: 100%; transform-origin: left center; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1); will-change: transform; }
+    .leaf.flipped { transform: rotateY(-180deg); }
+
+    .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; box-sizing: border-box; background-color: var(--book-bg); padding: 3rem 2.5rem; display: flex; flex-direction: column; color: var(--text-light); border: none; transition: background-color 1.5s, color 1.5s, box-shadow 1.5s; }
+    .front { border-radius: 2px 16px 16px 2px; box-shadow: inset 15px 0 25px -15px rgba(0,0,0,0.8), 5px 5px 25px rgba(0,0,0,0.5); }
+    .back { transform: rotateY(180deg); border-radius: 16px 2px 2px 16px; box-shadow: inset -15px 0 25px -15px rgba(0,0,0,0.8), -5px 5px 25px rgba(0,0,0,0.5); background-image: radial-gradient(circle at center, #1c1c1c 0%, #111 100%); }
+    body.okinawa-theme .front { box-shadow: inset 15px 0 25px -15px rgba(0,0,0,0.1), 5px 5px 25px rgba(2,119,189,0.2); }
+    body.okinawa-theme .back { background-image: none; box-shadow: inset -15px 0 25px -15px rgba(0,0,0,0.1), -5px 5px 25px rgba(2,119,189,0.2); }
+
+    .cover-front { text-align: center; justify-content: center; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 5px 5px 25px rgba(0,0,0,0.5); }
+    body.okinawa-theme .cover-front { box-shadow: inset 0 0 50px rgba(2,119,189,0.15), 5px 5px 25px rgba(2,119,189,0.2); }
+    .cover-front h1 { font-size: 3.4rem; margin: 0 0 10px 0; line-height: 1.2; }
+    .cover-front h2 { font-size: 1.3rem; font-weight: 400; letter-spacing: 2px; color: var(--gold); transition: color 1.5s; margin-top: 20px;}
+    
+    .page-title { color: #ffffff; text-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 1.8rem; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 15px; transition: border-color 1.5s, color 1.5s, text-shadow 1.5s; flex-shrink: 0; }
+    body.okinawa-theme .page-title { color: var(--gold); text-shadow: none; }
+    .status { font-size: 0.9rem; font-family: 'Noto Serif TC', serif; letter-spacing: 1px; float: right; margin-top: 8px; color: #ff4d4d; text-shadow: none;}
+
+    /* 動態行程區塊 */
+    .timeline { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overflow-x: hidden; max-height: 380px; padding-right: 10px; flex-grow: 1; }
+    .timeline::-webkit-scrollbar { width: 4px; } .timeline::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
+    .tl-group { opacity: 0; transform: translateY(10px); transition: all 0.8s ease; display: none; }
+    .tl-group.unlocked { opacity: 1; transform: translateY(0); display: block; }
+    .tl-block { display: flex; flex-direction: column; gap: 4px; margin-bottom: 2px; }
+    .tl-time { color: var(--gold); font-size: 1.3rem; transition: color 1.5s; }
+    .tl-title { font-size: 1.05rem; color: var(--text-light); font-weight: bold; transition: color 1.5s; }
+    .tl-loc { font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; gap: 5px; transition: color 1.5s; }
+    .tl-sep { color: #888; font-size: 0.85rem; margin: 4px 0; letter-spacing: 1px; font-style: italic; }
+    .tl-arrow { color: #888; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; margin: 2px 0 2px 5px; }
+
+    /* 按鈕與印章 */
+    .input-group { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .input-group input { background: transparent; border: none; border-bottom: 1px solid var(--gold-dim); color: var(--gold); font-size: 1.05rem; padding: 8px; text-align: center; outline: none; transition: border-color 1.5s, color 1.5s;}
+    .input-group input:focus { border-bottom: 1px solid var(--gold); }
+    .input-group button { background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); padding: 10px; cursor: pointer; transition: all 0.3s; font-size: 1rem; border-radius: 4px;}
+    .input-group button:hover { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+    .next-page-btn, .prev-page-btn { display: none; color: var(--gold); cursor: pointer; font-size: 1rem; margin-top: 15px; letter-spacing: 1px; transition: text-shadow 0.3s, color 1.5s; text-align: right;}
+    .prev-page-btn { display: block; text-align: left; margin-top: auto; margin-bottom: 10px; }
+    .next-page-btn:hover, .prev-page-btn:hover { text-shadow: 0 0 8px var(--gold-dim); }
+
+    .stamp-wrapper { margin-top: auto; margin-bottom: 20px; display: flex; justify-content: center; pointer-events: none; }
+    .stamp { width: 130px; height: 130px; border: 3px double #a12b28; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-15deg); color: #a12b28; font-family: 'Playfair Display', serif; opacity: 0.7; transition: all 1.5s ease; }
+    .stamp-top, .stamp-bot { font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+    .stamp-mid { font-size: 20px; font-weight: 900; letter-spacing: 2px; border-top: 1px solid; border-bottom: 1px solid; margin: 4px 0; padding: 3px 0; }
+    body.okinawa-theme .stamp { border-color: #0277bd; color: #0277bd; transform: rotate(10deg); opacity: 0.8; }
+
+    /* 懸浮按鈕與彈窗 */
+    .fixed-btn { position: fixed; top: 25px; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 1rem; letter-spacing: 1px; z-index: 1000; transition: all 0.3s; display: none; }
+    .survey-btn { right: 25px; border: 1px solid var(--gold); color: var(--gold); background: rgba(0,0,0,0.5); }
+    .survey-btn:hover { background: rgba(212,175,55,0.2); box-shadow: 0 0 15px rgba(212,175,55,0.3); } body.okinawa-theme .survey-btn { display: none !important; }
+    .download-btn { left: 25px; border: 1px solid #0277bd; color: #0277bd; background: rgba(255,255,255,0.9); font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.1);} .download-btn:hover { background: #0277bd; color: #fff; }
+    
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.4s; } .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-box { background: #111; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; text-align: center; color: var(--gold); max-width: 400px; width: 90%; box-shadow: 0 0 30px rgba(212,175,55,0.2); } .modal-box h3 { font-size: 1.4rem; margin-bottom: 30px; line-height: 1.5; color: #fff; }
+    .modal-btns button { background: var(--gold); color: #000; border: none; padding: 10px 25px; font-size: 1.1rem; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%; transition: transform 0.2s; } .modal-btns button:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+
+  <!-- 動態背景 -->
+  <div class="bg-layer balloons-layer"><div class="balloon p1"></div><div class="balloon p2"></div><div class="balloon p3"></div><div class="balloon p4"></div><div class="balloon p5"></div></div>
+  <div class="bg-layer clouds-layer"><div class="cloud p1"></div><div class="cloud p2"></div><div class="cloud p3"></div><div class="cloud p4"></div><div class="cloud p5"></div></div>
+
+  <button id="survey-btn" class="fixed-btn survey-btn" onclick="openModal()">問卷調查</button>
+  <button id="download-btn" class="fixed-btn download-btn" onclick="downloadHTML()">📥 儲存行程表</button>
+
+  <div class="scene">
+    <div class="book-wrapper" id="book-wrapper">
+      <div class="book" id="book-container">
+        <!-- JS 會將書本內容渲染至此 -->
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal-overlay">
+    <div class="modal-box"><h3 id="modal-text"></h3><div class="modal-btns"><button id="modal-btn" onclick="nextModalStep()"></button></div></div>
+  </div>
+
+  <script>
+    /* 集中管理的行程與關卡資料 (增加獨立 oki_time 與 blessing) */
+    const tripData = {
+      day1: {
+        dateTitle: "10.24 (Sat)", leftLabel: "Day 1", stamp: "DAY 1 CLEAR",
+        blessing: "A beautiful journey begins.",
+        quests: [{ pwd: "1024", nextHint: "提示：下午拿生日禮物的地點在哪？" }, { pwd: "桃園機場", nextHint: "提示：晚上去吃哪一家燒肉？" }, { pwd: "燒肉", nextHint: "" }],
+        timeline: [
+          { group: 1, type: "block", hk_time: "10:00~12:00", oki_time: "14:30~16:30", hk_title: "活力充沛!開啟開心之旅!", hk_loc: "📍 竹北體育館", oki_title: "準備出發!生日之旅!!", oki_loc: "📍 桃園機場" },
+          { group: 1, type: "sep", hk_text: "-------- 回家休息 --------", oki_text: "⬇ 單軌電車移動" },
+          { group: 2, type: "block", hk_time: "14:00~16:00", oki_time: "18:30~21:50", hk_title: "拿生日禮物!!", hk_loc: "📍 桃園機場", oki_title: "飛往沖繩溜!!", oki_loc: "📍 那霸機場" },
+          { group: 2, type: "arrow", hk_text: "⬇ 太魯閣晶英機場接送", oki_text: "⬇ ~先回飯店或吃飯飯~" },
+          { group: 2, type: "sep", hk_text: "16:00~19:00 通勤中...", oki_text: "22:00~23:00 抓緊時間!!..." },
+          { group: 3, type: "block", hk_time: "19:30~21:30", oki_time: "23:00~24:00", hk_title: "大餐中的第一餐!", hk_loc: "📍 花蓮 燒肉", oki_title: "頂級和牛燒肉，補回腦力！", oki_loc: "📍 Yasaimakigushiya Gururi Honten 居酒屋" }
+        ]
+      },
+      day2: {
+        dateTitle: "10.25 (Sun)", leftLabel: "Day 2", stamp: "DAY 2 CLEAR",
+        blessing: "Enjoy every little moment.",
+        quests: [{ pwd: "湘穎", nextHint: "提示：下午在哪裡看海景？" }, { pwd: "觀景台", nextHint: "提示：晚上去逛哪個夜市？" }, { pwd: "東大門", nextHint: "" }],
+        timeline: [
+          { group: 1, type: "block", hk_time: "10:00~14:00", oki_time: "07:30~08:10", hk_title: "看海療癒，徹底忘記工作", hk_loc: "📍 遠雄海洋公園", oki_title: "無腦放空，直奔北部絕美海景", oki_loc: "📍 古宇利島" },
+          { group: 1, type: "arrow", hk_text: "⬇ 專車接送", oki_text: "⬇ 觀光巴士移動" },
+          { group: 2, type: "block", hk_time: "15:00~17:00", oki_time: "14:30~17:00", hk_title: "看著風景享用下午茶", hk_loc: "📍 園區觀景台", oki_title: "黑潮之海大水槽前療癒放空", oki_loc: "📍 美麗海水族館" },
+          { group: 2, type: "sep", hk_text: "-------- 回飯店小憩 --------", oki_text: "-------- 乘車返回市區 --------" },
+          { group: 3, type: "block", hk_time: "18:30~21:00", oki_time: "18:00~20:30", hk_title: "花蓮在地美食巡禮", hk_loc: "📍 東大門夜市", oki_title: "異國風情夕陽與大餐", oki_loc: "📍 美國村" }
+        ]
+      },
+      day3: {
+        dateTitle: "10.26 (Mon)", leftLabel: "Day 3", stamp: "DAY 3 CLEAR",
+        blessing: "Let the sea set you free.",
+        quests: [{ pwd: "2", nextHint: "提示：下午去喝什麼？" }, { pwd: "咖啡", nextHint: "提示：晚上吃哪家麻辣鍋？" }, { pwd: "青花驕", nextHint: "" }],
+        timeline: [
+          { group: 1, type: "block", hk_time: "08:00~10:00", oki_time: "10:00~13:00", hk_title: "無壓力輕鬆慢跑", hk_loc: "📍 七星潭海岸線", oki_title: "生日禮物挑選!!", oki_loc: "📍 parco city" },
+          { group: 1, type: "sep", hk_text: "-------- 盥洗與休息 --------", oki_text: "⬇ 單軌電車移動" },
+          { group: 2, type: "block", hk_time: "12:00~14:00", oki_time: "11:30~14:30", hk_title: "吹海風喝咖啡恢復體力", hk_loc: "📍 絕美海景咖啡廳", oki_title: "免稅店商圈大肆採買", oki_loc: "📍 新都心商圈" },
+          { group: 2, type: "arrow", hk_text: "⬇ 悠閒漫步", oki_text: "⬇ 單軌電車移動" },
+          { group: 3, type: "block", hk_time: "18:00~20:00", oki_time: "18:30~20:30", hk_title: "把消耗的熱量補回來！", hk_loc: "📍 青花驕麻辣鍋", oki_title: "清甜高湯補回慢跑熱量！", oki_loc: "📍 阿古豬涮涮鍋" }
+        ]
+      },
+      day4: {
+        dateTitle: "10.27 (Tue)", leftLabel: "Day 4", stamp: "DAY 4 CLEAR",
+        blessing: "The best is yet to come.",
+        quests: [
+          { pwd: "1024", nextHint: "提示：下午去哪裡買東西？" },
+          { pwd: "市區", nextHint: "提示：最後搭什麼車回家？" },
+          { pwd: "高鐵", nextHint: "" }
+        ],
+        timeline: [
+          { group: 1, type: "block", hk_time: "10:00~12:00", oki_time: "09:00~11:30", hk_title: "享受沒有專案進度的早晨", hk_loc: "📍 太魯閣晶英酒店", oki_title: "近距離看飛機起降", oki_loc: "📍 瀨長島" },
+          { group: 1, type: "arrow", hk_text: "⬇ 收拾行李", oki_text: "⬇ 悠閒漫步" },
+          { group: 2, type: "block", hk_time: "13:00~15:00", oki_time: "13:00~15:00", hk_title: "採買特色伴手禮", hk_loc: "📍 花蓮市區", oki_title: "無敵海景配熱騰騰鬆餅", oki_loc: "📍 幸福鬆餅" },
+          { group: 2, type: "sep", hk_text: "-------- 準備踏上歸途 --------", oki_text: "-------- 準備去機場 --------" },
+          { group: 3, type: "block", hk_time: "16:00~18:00", oki_time: "16:00~18:00", hk_title: "帶著放鬆的心情回家", hk_loc: "📍 高鐵站", oki_title: "伴手禮衝刺，滿載而歸！", oki_loc: "📍 那霸機場國內線" }
+        ]
+      }
+    };
+
+    /* 追蹤進度與狀態 */
+    const currentStep = { day1: 0, day2: 0, day3: 0, day4: 0 };
+    let isOkinawaTheme = false;
+
+    /* 初始化 HTML 渲染 */
+    function initBook() {
+      let bookHtml = '';
+      const order = ['day4', 'day3', 'day2', 'day1'];
+      
+      // 用來映射下一張左頁的對應內容
+      const nextDayMap = { 1: 'day2', 2: 'day3', 3: 'day4' };
+      
+      order.forEach((dayKey, i) => {
+        const d = tripData[dayKey];
+        const index = 4 - i; // day4 -> leaf4, day3 -> leaf3 ...
+        
+        // 組合時間軸 HTML
+        let timelineHtml = '';
+        const groups = [1, 2, 3];
+        groups.forEach(g => {
+          let groupItemsHtml = '';
+          d.timeline.filter(t => t.group === g).forEach(t => {
+            if(t.type === 'block') groupItemsHtml += `<div class="tl-block"><div class="tl-time serif-title dyn-time">${t.hk_time}</div><div class="tl-title dyn-t">${t.hk_title}</div><div class="tl-loc dyn-l">${t.hk_loc}</div></div>`;
+            else if(t.type === 'arrow') groupItemsHtml += `<div class="tl-arrow dyn-a">${t.hk_text}</div>`;
+            else if(t.type === 'sep') groupItemsHtml += `<div class="tl-sep dyn-s">${t.hk_text}</div>`;
+          });
+          if(groupItemsHtml) timelineHtml += `<div id="${dayKey}-g${g}" class="tl-group">${groupItemsHtml}</div>`;
+        });
+
+        // 處理背面的左頁內容位移邏輯
+        let backHtml = '';
+        if (index === 4) {
+          backHtml = `
+            <div class="cursive" style="text-align:center; font-size: 3.5rem; margin-top: 15px;">The End</div>
+            <div class="prev-page-btn" onclick="flipPrev(${index})">🡠 翻回上一頁</div>
+            <div class="stamp-wrapper">
+              <div class="stamp"><div class="stamp-top st-top">TOP SECRET</div><div class="stamp-mid st-mid">APPROVED</div><div class="stamp-bot st-bot">${tripData['day4'].stamp}</div></div>
+            </div>`;
+        } else {
+          const nextData = tripData[nextDayMap[index]];
+          backHtml = `
+            <div class="cursive" style="text-align:center; font-size: 2.5rem; margin-top: 15px;">${nextData.leftLabel}</div>
+            <div class="cursive" style="text-align:center; font-size: 1.2rem; margin-top: 5px; color: var(--gold);">${nextData.blessing}</div>
+            <div class="prev-page-btn" onclick="flipPrev(${index})">🡠 翻回上一頁</div>
+            <div class="stamp-wrapper">
+              <div class="stamp"><div class="stamp-top st-top">TOP SECRET</div><div class="stamp-mid st-mid">APPROVED</div><div class="stamp-bot st-bot">${d.stamp}</div></div>
+            </div>`;
+        }
+
+        bookHtml += `
+        <div class="leaf" id="leaf${index}" style="z-index: ${5 - index};">
+          <div class="front">
+            <h2 class="page-title serif-title">${d.dateTitle}<span id="status-${dayKey}" class="status">Locked</span></h2>
+            <div id="content-${dayKey}" class="timeline">${timelineHtml}</div>
+            <div id="input-area-${dayKey}" class="input-group">
+              <input type="text" id="pwd-${dayKey}" placeholder="提示：${d.quests[0]? d.quests[0].nextHint : '出發日期？'}" onkeydown="if(event.key==='Enter') checkStep('${dayKey}')">
+              <button onclick="checkStep('${dayKey}')">解鎖行程</button>
+            </div>
+            <div id="next-${dayKey}" class="next-page-btn" onclick="flipNext(${index - 1})">翻開下一頁 ➔</div>
+          </div>
+          <div class="back">
+            ${backHtml}
+          </div>
+        </div>`;
+      });
+
+      // 封面背面 (Leaf 0) 負責顯示 Day 1 左側頁
+      bookHtml += `
+        <div class="leaf" id="leaf0" style="z-index: 5;">
+          <div class="front cover-front">
+            <h1 class="cursive" id="cover-title">Happy 30th<br>Birthday Trip</h1>
+            <h2 id="cover-sub" class="serif-title">10.24 - 10.27<br>慶生 Trip</h2>
+            <p style="color: var(--text-dim); font-size: 0.95rem; margin-top: 20px; font-style: italic;">For Kieth</p>
+            <div class="input-group" style="margin-top: 35px;">
+              <input type="text" id="pwd-cover" placeholder="請輸入主機密碼 (提示: 生日)" onkeydown="if(event.key==='Enter') checkCover()">
+              <button onclick="checkCover()">確認登入</button>
+            </div>
+          </div>
+          <div class="back">
+            <div class="cursive" style="text-align:center; font-size: 2.5rem; margin-top: 15px;">${tripData['day1'].leftLabel}</div>
+            <div class="cursive" style="text-align:center; font-size: 1.2rem; margin-top: 5px; color: var(--gold);">${tripData['day1'].blessing}</div>
+            <div class="prev-page-btn" onclick="flipPrev(0)">🡠 闔上書本</div>
+            <div class="stamp-wrapper"><div class="stamp"><div class="stamp-top st-top">TOP SECRET</div><div class="stamp-mid st-mid">APPROVED</div><div class="stamp-bot st-bot">SYSTEM CLEAR</div></div></div>
+          </div>
+        </div>`;
+      
+      document.getElementById('book-container').innerHTML = bookHtml;
+      
+      // 初始化第一天的提示語
+      document.getElementById('pwd-day1').placeholder = "提示：出發日期是幾月幾號？(如 1024)";
+    }
+    
+    initBook();
+
+    /* 封面解鎖與萬用作弊碼 */
+    function checkCover() {
+      const val = document.getElementById('pwd-cover').value.trim();
+      if(val === '1026') { flipNext(0); } 
+      else if (val === '0000') {
+        ['day1', 'day2', 'day3', 'day4'].forEach(dayKey => {
+          let max = tripData[dayKey].quests.length;
+          currentStep[dayKey] = max;
+          for(let s=1; s<=max; s++){ document.getElementById(`${dayKey}-g${s}`).classList.add('unlocked'); }
+          document.getElementById(`input-area-${dayKey}`).style.display = 'none';
+          document.getElementById(`next-${dayKey}`).style.display = 'block';
+          document.getElementById(`status-${dayKey}`).textContent = 'Unlocked';
+          document.getElementById(`status-${dayKey}`).style.color = '#4caf50';
+        });
+        document.getElementById('survey-btn').style.display = 'block';
+        flipNext(0);
+      } else { alert('密碼錯誤！再想一下喔。'); document.getElementById('pwd-cover').value = ''; }
+    }
+
+    /* 翻頁邏輯 */
+    function flipNext(index) {
+      const leaf = document.getElementById(`leaf${index}`);
+      leaf.classList.add('flipped');
+      if(index === 0) document.getElementById('book-wrapper').classList.add('is-open');
+      setTimeout(() => { leaf.style.zIndex = index; }, 750);
+    }
+    function flipPrev(index) {
+      const leaf = document.getElementById(`leaf${index}`);
+      leaf.classList.remove('flipped');
+      if(index === 0) document.getElementById('book-wrapper').classList.remove('is-open');
+      setTimeout(() => { leaf.style.zIndex = 5 - index; }, 750);
+    }
+
+    /* 單頁解鎖邏輯 */
+    function checkStep(dayId) {
+      const step = currentStep[dayId];
+      const inputEl = document.getElementById(`pwd-${dayId}`);
+      if (inputEl.value.trim() === tripData[dayId].quests[step].pwd) {
+        document.getElementById(`${dayId}-g${step + 1}`).classList.add('unlocked');
+        setTimeout(() => { const tl = document.getElementById(`content-${dayId}`); tl.scrollTop = tl.scrollHeight; }, 100);
+        currentStep[dayId]++;
+        if (currentStep[dayId] < tripData[dayId].quests.length) {
+          inputEl.value = ''; inputEl.placeholder = tripData[dayId].quests[step].nextHint;
+        } else {
+          document.getElementById(`input-area-${dayId}`).style.display = 'none';
+          document.getElementById(`next-${dayId}`).style.display = 'block';
+          const st = document.getElementById(`status-${dayId}`); st.textContent = 'Unlocked'; st.style.color = '#4caf50';
+          if(dayId === 'day4') document.getElementById('survey-btn').style.display = 'block';
+        }
+      } else { alert('密碼錯誤！'); inputEl.value = ''; }
+    }
+
+    /* 問答與沖繩變身 */
+    let modalStep = 0;
+    const dialogs = [
+      { text: "這四天的花東放空行程，你滿意嗎？", btn: "超滿意！" },
+      { text: "真的嗎？如果偷偷換去別的地方，也可以嗎？", btn: "只要跟妳去，哪裡都可以！" },
+      { text: "確定喔？說好了就不准後悔喔！", btn: "絕不後悔！" },
+      { text: "太好了！特務行動代號解除，其實這是一場騙局！", btn: "揭曉真相 ➔" }
+    ];
+    function openModal() { document.getElementById('modal').classList.add('show'); modalStep = 0; updateModal(); }
+    function nextModalStep() { modalStep++; updateModal(); }
+    function updateModal() {
+      if(modalStep < dialogs.length) {
+        document.getElementById('modal-text').innerText = dialogs[modalStep].text;
+        document.getElementById('modal-btn').innerText = dialogs[modalStep].btn;
+      } else {
+        document.getElementById('modal').classList.remove('show');
+        transformToOkinawa();
+      }
+    }
+
+    function transformToOkinawa() {
+      isOkinawaTheme = true;
+      document.body.classList.add('okinawa-theme');
+      document.getElementById('download-btn').style.display = 'block';
+      document.querySelectorAll('.st-top').forEach(el => el.innerText = "JAPAN CUSTOMS");
+      document.querySelectorAll('.st-mid').forEach(el => el.innerText = "ARRIVAL");
+      document.querySelectorAll('.st-bot').forEach(el => el.innerText = "OKINAWA");
+      document.getElementById('cover-title').innerHTML = "Okinawa<br>Escape";
+      document.getElementById('cover-sub').innerHTML = "10.24 - 10.27<br>沖繩真·慶生 Trip";
+      
+      // 動態更新所有行程資料(包含時間)
+      ['day1', 'day2', 'day3', 'day4'].forEach(dayKey => {
+        const d = tripData[dayKey];
+        const container = document.getElementById(`content-${dayKey}`);
+        const times = container.querySelectorAll('.dyn-time');
+        const titles = container.querySelectorAll('.dyn-t');
+        const locs = container.querySelectorAll('.dyn-l');
+        const arrows = container.querySelectorAll('.dyn-a');
+        const seps = container.querySelectorAll('.dyn-s');
+        
+        let tIdx = 0, aIdx = 0, sIdx = 0;
+        d.timeline.forEach(item => {
+          if (item.type === 'block') { 
+            times[tIdx].innerText = item.oki_time; 
+            titles[tIdx].innerText = item.oki_title; 
+            locs[tIdx].innerText = item.oki_loc; 
+            tIdx++; 
+          }
+          if (item.type === 'arrow') { arrows[aIdx].innerText = item.oki_text; aIdx++; }
+          if (item.type === 'sep') { seps[sIdx].innerText = item.oki_text; sIdx++; }
+        });
+      });
+    }
+
+    /* 下載 HTML */
+    function downloadHTML() {
+      let contentHtml = '';
+      ['day1', 'day2', 'day3', 'day4'].forEach(dayKey => {
+        contentHtml += `<div class="day-card"><h2>${tripData[dayKey].leftLabel} (${tripData[dayKey].dateTitle.split(' ')[0]})</h2>`;
+        tripData[dayKey].timeline.forEach(item => {
+          if(item.type === 'block') contentHtml += `<div class="item"><span class="time">${item.oki_time}</span><span class="title">${item.oki_title}</span><br><span class="loc">${item.oki_loc}</span></div>`;
+          else if(item.type === 'arrow' || item.type === 'sep') contentHtml += `<div class="sep">${item.oki_text}</div>`;
+        });
+        contentHtml += `</div>`;
+      });
+      const htmlTpl = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Okinawa Escape</title><style>body { background: #e0f7fa; color: #1c313a; font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; } h1 { color: #0277bd; text-align: center; border-bottom: 2px solid #0277bd; padding-bottom: 15px; font-size: 24px; line-height: 1.4;} .day-card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); } .day-card h2 { color: #00838f; border-left: 5px solid #00838f; padding-left: 12px; margin-top: 0; font-size: 20px;} .item { margin-bottom: 15px; line-height: 1.6; } .time { color: #0277bd; font-weight: bold; font-size: 16px; display: block; margin-bottom: 2px;} .loc { color: #607d8b; font-size: 14px; } .title { font-size: 16px; font-weight: bold; color: #263238; } .sep { color: #90a4ae; font-size: 13px; margin: 10px 0; font-style: italic; }</style></head><body><h1>Okinawa Escape<br>沖繩慶生之旅 10.24-10.27</h1>${contentHtml}</body></html>`;
+      const blob = new Blob([htmlTpl], { type: 'text/html' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'Okinawa_Trip.html'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
