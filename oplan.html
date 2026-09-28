@@ -19,7 +19,8 @@
       --text-light: #1c313a; --text-dim: #455a64; --line: #b3e5fc;
     }
 
-    body { background-color: var(--bg-color); background-image: radial-gradient(circle at center, var(--bg-grad-center) 0%, var(--bg-grad-edge) 100%); min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif TC', serif; overflow: hidden; transition: all 1.5s ease; }
+    /* 將 overflow: hidden 改為 auto，允許畫面自由滑動與平移 */
+    body { background-color: var(--bg-color); background-image: radial-gradient(circle at center, var(--bg-grad-center) 0%, var(--bg-grad-edge) 100%); min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif TC', serif; overflow: auto; transition: all 1.5s ease; }
 
     /* 背景與硬體加速 */
     .bg-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; transition: opacity 1.5s ease; }
@@ -28,7 +29,6 @@
 
     .balloon { position: absolute; bottom: -300px; width: 180px; height: 220px; background: radial-gradient(circle at 35% 35%, #fff0d4 0%, #d4af37 60%, #8b7322 100%); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; box-shadow: inset -10px -10px 25px rgba(0,0,0,0.4), 0 0 40px rgba(212,175,55,0.2); animation: floatUp linear infinite; will-change: transform; }
     
-    /* 修正氣球接點 */
     .balloon::after { content: ''; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 16px solid #a68521; }
     .balloon::before { content: ''; position: absolute; bottom: -130px; left: 50%; width: 30px; height: 130px; border-left: 2px solid rgba(212,175,55,0.6); border-radius: 0 0 0 100%; }
 
@@ -50,7 +50,6 @@
     body.okinawa-theme .cursive { color: #0277bd; text-shadow: 0 2px 8px rgba(2,119,189,0.3); }
     .serif-title { font-family: 'Playfair Display', serif; font-weight: 700; letter-spacing: 1px; }
 
-    /* --- 修改這裡：加入縮放與定位基準 --- */
     .scene { 
       perspective: 2500px; 
       width: 960px; 
@@ -122,33 +121,9 @@
     .modal-box { background: #111; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; text-align: center; color: var(--gold); max-width: 400px; width: 90%; box-shadow: 0 0 30px rgba(212,175,55,0.2); } .modal-box h3 { font-size: 1.4rem; margin-bottom: 30px; line-height: 1.5; color: #fff; }
     .modal-btns button { background: var(--gold); color: #000; border: none; padding: 10px 25px; font-size: 1.1rem; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%; transition: transform 0.2s; } .modal-btns button:active { transform: scale(0.95); }
 
-    /* --- 新增這裡：橫向提示畫面的 CSS --- */
-    #orientation-warning {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(17, 17, 17, 0.95);
-      color: var(--gold);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 1.5rem;
-      line-height: 2;
-      letter-spacing: 2px;
-    }
-    /* 當螢幕寬度小於 768px 且手機為「直向 (portrait)」時顯示 */
-    @media (max-width: 768px) and (orientation: portrait) {
-      #orientation-warning {
-        display: flex;
-      }
-    }
   </style>
 </head>
 <body>
-
-  <!-- --- 新增這行：手機直向時的提示 --- -->
-  <div id="orientation-warning">機密任務啟動<br>請將手機轉為「橫向」解鎖 📱🔄</div>
 
   <!-- 動態背景 -->
   <div class="bg-layer balloons-layer"><div class="balloon p1"></div><div class="balloon p2"></div><div class="balloon p3"></div><div class="balloon p4"></div><div class="balloon p5"></div></div>
@@ -170,7 +145,7 @@
   </div>
 
   <script>
-    /* 集中管理的行程與關卡資料 (增加獨立 oki_time 與 blessing) */
+    /* 集中管理的行程與關卡資料 */
     const tripData = {
       day1: {
         dateTitle: "10.24 (Sat)", leftLabel: "Day 1", stamp: "DAY 1 CLEAR",
@@ -227,23 +202,18 @@
       }
     };
 
-    /* 追蹤進度與狀態 */
     const currentStep = { day1: 0, day2: 0, day3: 0, day4: 0 };
     let isOkinawaTheme = false;
 
-    /* 初始化 HTML 渲染 */
     function initBook() {
       let bookHtml = '';
       const order = ['day4', 'day3', 'day2', 'day1'];
-      
-      // 用來映射下一張左頁的對應內容
       const nextDayMap = { 1: 'day2', 2: 'day3', 3: 'day4' };
       
       order.forEach((dayKey, i) => {
         const d = tripData[dayKey];
-        const index = 4 - i; // day4 -> leaf4, day3 -> leaf3 ...
+        const index = 4 - i;
         
-        // 組合時間軸 HTML
         let timelineHtml = '';
         const groups = [1, 2, 3];
         groups.forEach(g => {
@@ -256,7 +226,6 @@
           if(groupItemsHtml) timelineHtml += `<div id="${dayKey}-g${g}" class="tl-group">${groupItemsHtml}</div>`;
         });
 
-        // 處理背面的左頁內容位移邏輯
         let backHtml = '';
         if (index === 4) {
           backHtml = `
@@ -293,7 +262,6 @@
         </div>`;
       });
 
-      // 封面背面 (Leaf 0) 負責顯示 Day 1 左側頁
       bookHtml += `
         <div class="leaf" id="leaf0" style="z-index: 5;">
           <div class="front cover-front">
@@ -314,14 +282,11 @@
         </div>`;
       
       document.getElementById('book-container').innerHTML = bookHtml;
-      
-      // 初始化第一天的提示語
       document.getElementById('pwd-day1').placeholder = "提示：出發日期是幾月幾號？(如 1024)";
     }
     
     initBook();
 
-    /* 封面解鎖與萬用作弊碼 */
     function checkCover() {
       const val = document.getElementById('pwd-cover').value.trim();
       if(val === '1026') { flipNext(0); } 
@@ -340,7 +305,6 @@
       } else { alert('密碼錯誤！再想一下喔。'); document.getElementById('pwd-cover').value = ''; }
     }
 
-    /* 翻頁邏輯 */
     function flipNext(index) {
       const leaf = document.getElementById(`leaf${index}`);
       leaf.classList.add('flipped');
@@ -354,7 +318,6 @@
       setTimeout(() => { leaf.style.zIndex = 5 - index; }, 750);
     }
 
-    /* 單頁解鎖邏輯 */
     function checkStep(dayId) {
       const step = currentStep[dayId];
       const inputEl = document.getElementById(`pwd-${dayId}`);
@@ -373,7 +336,6 @@
       } else { alert('密碼錯誤！'); inputEl.value = ''; }
     }
 
-    /* 問答與沖繩變身 */
     let modalStep = 0;
     const dialogs = [
       { text: "這四天的花東放空行程，你滿意嗎？", btn: "超滿意！" },
@@ -403,7 +365,6 @@
       document.getElementById('cover-title').innerHTML = "Okinawa<br>Escape";
       document.getElementById('cover-sub').innerHTML = "10.24 - 10.27<br>沖繩真·慶生 Trip";
       
-      // 動態更新所有行程資料(包含時間)
       ['day1', 'day2', 'day3', 'day4'].forEach(dayKey => {
         const d = tripData[dayKey];
         const container = document.getElementById(`content-${dayKey}`);
@@ -427,7 +388,6 @@
       });
     }
 
-    /* 下載 HTML */
     function downloadHTML() {
       let contentHtml = '';
       ['day1', 'day2', 'day3', 'day4'].forEach(dayKey => {
